@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHC Cricket Scorecard Reel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- VIDEO BACKGROUND AREA (Reserved for match footage) -->
+    <div class="video-area"></div>
+
+    <!-- NEW CAPSULE SCORECARD LAYOUT -->
+    <div id="scorecard" class="scorecard-wrapper">
+        
+        <!-- Team 1 Segment -->
+        <div class="segment team-pill team-left" id="team1">TEAM 1</div>
+
+        <!-- Batters Sections -->
+        <div class="segment player-box">
+            <div class="player-row">
+                <span class="name" id="bat1">BATSMAN 1</span>
+                <span class="p-score">
+                    <span id="bat1Score">0</span><span class="balls" id="bat1Balls" style="font-size: 0.95rem; font-weight: 700; color: #777; margin-left: 3px;">(0)</span><span class="striker-star" style="color: var(--red); margin-left: 3px;">*</span>
+                </span>
+            </div>
+            <div class="player-row">
+                <span class="name" id="bat2">BATSMAN 2</span>
+                <span class="p-score">
+                    <span id="bat2Score">0</span><span class="balls" id="bat2Balls" style="font-size: 0.95rem; font-weight: 700; color: #777; margin-left: 3px;">(0)</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Central Score Section -->
+        <div class="score-container" style="display: flex; flex-direction: column; align-items: center; position: relative;">
+            <div class="segment score-capsule">
+                <div class="score-row" id="score">0-0</div>
+                <div class="overs-row" id="overs">OVERS 0.0</div>
+            </div>
+            <!-- Event / Context Banner -->
+            <div id="event-banner" class="event-banner"></div>
+        </div>
+
+        <!-- Bowler Section -->
+        <div class="segment player-box">
+            <div class="player-row">
+                <span class="name" id="bowler">BOWLER</span>
+                <span class="b-figures" id="bowlerFigures">0/0</span>
+            </div>
+            <div class="stats" id="over-runs">0 0 0 0</div>
+        </div>
+
+        <!-- Team 2 Segment -->
+        <div class="segment team-pill team-right" id="team2">TEAM 2</div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

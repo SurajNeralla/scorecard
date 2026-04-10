@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LocalStorage Test</title>
+</head>
+<body>
+
+<h2>LocalStorage Test</h2>
+
+<button onclick="save()">SAVE</button>
+<button onclick="load()">LOAD</button>
+
+<p id="out"></p>
+
+<script>
+function save(){
+  localStorage.setItem("hello","WORLD");
+  alert("Saved");
+}
+
+function load(){
+  document.getElementById("out").innerText =
+    localStorage.getItem("hello");
+}
+</script>
+
+</body>
+</html>
