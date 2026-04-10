@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHC Scorecard Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h1 {
+            font-weight: 800;
+            margin-bottom: 25px;
+            text-align: center;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            height: 60px !important;
+            width: 100% !important;
+            padding: 0 10px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 800 !important;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-run { background: var(--accent); color: white; }
+        .btn-run:hover { background: var(--accent-hover); }
+
+        .btn-wicket { background: var(--danger); color: white; grid-column: span 2; }
+        .btn-wicket:hover { opacity: 0.9; }
+
+        .btn-ball { background: var(--warning); color: white; }
+        .btn-ball:hover { opacity: 0.9; }
+
+        .btn-reset { 
+            background: transparent; 
+            color: var(--danger); 
+            border: 1px solid var(--danger);
+            margin-top: 20px;
+            width: 100%;
+        }
+        .btn-reset:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--success);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .action-grid { grid-template-columns: repeat(2, 1fr); }
+            .btn-wicket { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1>SHC Scorecard Admin</h1>
+    
+    <div style="text-align: center;">
+        <div class="status-pill">● LIVE SYNC ACTIVE</div>
+    </div>
+
+        <!-- TEAMS SECTION -->
+        <div class="section" style="grid-column: span 2;">
+            <div class="section-title">Team Names</div>
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Team 1 (Left)</label>
+                    <input type="text" id="team1" placeholder="Team 1" oninput="saveState()">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Team 2 (Right)</label>
+                    <input type="text" id="team2" placeholder="Team 2" oninput="saveState()">
+                </div>
+            </div>
+        </div>
+
+        <!-- SCORE SECTION -->
+        <div class="section">
+            <div class="section-title">Match State</div>
+            <div class="form-group">
+                <label>Score (e.g. 24/3)</label>
+                <input type="text" id="score" placeholder="0/0" oninput="saveState()">
+            </div>
+            <div class="form-group">
+                <label>Overs (e.g. 4.0)</label>
+                <input type="text" id="overs" placeholder="0.0" oninput="saveState()">
+            </div>
+        </div>
+
+        <!-- PLAYERS SECTION -->
+        <div class="section">
+            <div class="section-title">Active Players</div>
+            <div class="form-group">
+                <label>Striker</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="bat1" placeholder="Name" oninput="saveState()" style="flex: 2;">
+                    <input type="number" id="bat1Score" placeholder="Runs" oninput="saveState()" style="flex: 1;">
+                    <input type="number" id="bat1Balls" placeholder="Balls" oninput="saveState()" style="flex: 1;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Non-Striker</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="bat2" placeholder="Name" oninput="saveState()" style="flex: 2;">
+                    <input type="number" id="bat2Score" placeholder="Runs" oninput="saveState()" style="flex: 1;">
+                    <input type="number" id="bat2Balls" placeholder="Balls" oninput="saveState()" style="flex: 1;">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Bowling</div>
+            <div class="form-group">
+                <label>Current Bowler</label>
+                <input type="text" id="bowler" placeholder="Name" oninput="saveState()">
+            </div>
+            <div class="form-group">
+                <label>Bowling Figures (W/R)</label>
+                <input type="text" id="bowlerFigures" placeholder="0/0" oninput="saveState()">
+            </div>
+            <div class="form-group">
+                <label>Over Runs (e.g. 4 0 6 1)</label>
+                <input type="text" id="overRuns" placeholder="0 0 0 0" oninput="saveState()">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Event/Ticker</div>
+            <div class="form-group">
+                <label>Latest Event</label>
+                <input type="text" id="event" placeholder="e.g. BOUNDARY!" oninput="saveState()">
+            </div>
+        </div>
+    </div>
+
+    <div class="section" style="grid-column: span 2; background: rgba(59, 130, 246, 0.1);">
+        <div class="section-title">Scoring Control</div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px; display: block;">QUICK RUNS</label>
+            <div class="action-grid">
+                <button class="btn-run" onclick="addRuns(0)">0 (Dot)</button>
+                <button class="btn-run" onclick="addRuns(1)">+1 Run</button>
+                <button class="btn-run" onclick="addRuns(2)">+2 Runs</button>
+                <button class="btn-run" onclick="addRuns(3)">+3 Runs</button>
+                <button class="btn-run" onclick="addRuns(4)">+4 Runs</button>
+                <button class="btn-run" onclick="addRuns(6)">+6 Runs</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px; display: block;">EXTRAS (NO BALL)</label>
+                <div class="action-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <button class="btn-ball" style="background: var(--warning);" onclick="addExtra('NB', 0)">NB</button>
+                    <button class="btn-ball" style="background: var(--warning);" onclick="addExtra('NB', 1)">NB+1</button>
+                    <button class="btn-ball" style="background: var(--warning);" onclick="addExtra('NB', 4)">NB+4</button>
+                </div>
+            </div>
+            <div>
+                <label style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px; display: block;">EXTRAS (WIDE)</label>
+                <div class="action-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <button class="btn-ball" style="background: var(--accent-hover);" onclick="addExtra('WD', 0)">WD</button>
+                    <button class="btn-ball" style="background: var(--accent-hover);" onclick="addExtra('WD', 1)">WD+1</button>
+                    <button class="btn-ball" style="background: var(--accent-hover);" onclick="addExtra('WD', 4)">WD+4</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-grid" style="grid-template-columns: 1fr 2fr;">
+            <button class="btn-ball" onclick="addBall(true)">+1 LEGAL BALL</button>
+            <button class="btn-wicket" onclick="addWicket()" style="background: var(--danger);">WICKET!</button>
+        </div>
+    </div>
+
+    <button class="btn-reset" onclick="resetMatch()">Reset Match State</button>
+</div>
+
+<script>
+    const STORAGE_KEY = "shc_match_state";
+
+    function getInputs() {
+        return {
+            team1: document.getElementById('team1'),
+            team2: document.getElementById('team2'),
+            score: document.getElementById('score'),
+            overs: document.getElementById('overs'),
+            bat1: document.getElementById('bat1'),
+            bat1Score: document.getElementById('bat1Score'),
+            bat1Balls: document.getElementById('bat1Balls'),
+            bat2: document.getElementById('bat2'),
+            bat2Score: document.getElementById('bat2Score'),
+            bat2Balls: document.getElementById('bat2Balls'),
+            bowler: document.getElementById('bowler'),
+            bowlerFigures: document.getElementById('bowlerFigures'),
+            overRuns: document.getElementById('overRuns'),
+            event: document.getElementById('event')
+        };
+    }
+
+    function loadState() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            const data = JSON.parse(stored);
+            const inputs = getInputs();
+            for (let key in data) {
+                if (inputs[key]) inputs[key].value = data[key];
+            }
+        }
+    }
+
+    function saveState() {
+        const inputs = getInputs();
+        if (!inputs.team1) return; // Guard for partial loads
+        const data = {
+            team1: inputs.team1.value,
+            team2: inputs.team2.value,
+            score: inputs.score.value,
+            overs: inputs.overs.value,
+            bat1: inputs.bat1.value,
+            bat1Score: inputs.bat1Score.value,
+            bat1Balls: inputs.bat1Balls.value,
+            bat2: inputs.bat2.value,
+            bat2Score: inputs.bat2Score.value,
+            bat2Balls: inputs.bat2Balls.value,
+            bowler: inputs.bowler.value,
+            bowlerFigures: inputs.bowlerFigures.value,
+            overRuns: inputs.overRuns.value,
+            event: inputs.event.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function appendOverRun(val) {
+        const overRunsInput = document.getElementById('overRuns');
+        let current = overRunsInput.value ? overRunsInput.value.trim().split(' ') : [];
+        current.push(val);
+        overRunsInput.value = current.join(' ');
+        saveState();
+    }
+
+    function swapStrike() {
+        const inputs = getInputs();
+        // Read current
+        let b1N = inputs.bat1.value;
+        let b1S = inputs.bat1Score.value;
+        let b1B = inputs.bat1Balls.value;
+        
+        let b2N = inputs.bat2.value;
+        let b2S = inputs.bat2Score.value;
+        let b2B = inputs.bat2Balls.value;
+
+        // Swap Values
+        inputs.bat1.value = b2N;
+        inputs.bat1Score.value = b2S;
+        inputs.bat1Balls.value = b2B;
+        
+        inputs.bat2.value = b1N;
+        inputs.bat2Score.value = b1S;
+        inputs.bat2Balls.value = b1B;
+
+        saveState();
+    }
+
+    function updateBowlerRuns(r) {
+        const figuresEl = document.getElementById('bowlerFigures');
+        let current = figuresEl.value || "0/0";
+        let [w, runs] = current.split('/').map(n => parseInt(n) || 0);
+        runs += r;
+        figuresEl.value = `${w}/${runs}`;
+    }
+
+    function addRuns(r) {
+        const scoreInput = document.getElementById('score');
+        const bat1ScoreInput = document.getElementById('bat1Score');
+        
+        let current = scoreInput.value;
+        if (!current || !current.includes('/')) {
+            current = "0/0";
+        }
+        let [runs, wickets] = current.split('/').map(n => parseInt(n) || 0);
+        
+        // Match Score
+        runs += r;
+        scoreInput.value = `${runs}/${wickets}`;
+        
+        // Add to Event Ticker for significant runs
+        if (r >= 4) {
+            const ev = document.getElementById('event');
+            const oldVal = ev.value; // Remember what the user manually typed (e.g. "Target: 154")
+            ev.value = r === 6 ? "SIXER! 🔥" : "FOUR! ⚡";
+            saveState();
+            setTimeout(() => { 
+                if(ev.value.includes('!')) {
+                    ev.value = oldVal; 
+                    saveState(); 
+                }
+            }, 3000);
+        }
+
+        // Batter Score (Striker)
+        let bScore = parseInt(bat1ScoreInput.value) || 0;
+        bat1ScoreInput.value = bScore + r;
+        
+        // Batter Balls
+        const bat1BallsInput = document.getElementById('bat1Balls');
+        let bBalls = parseInt(bat1BallsInput.value) || 0;
+        bat1BallsInput.value = bBalls + 1;
+
+        // Bowler Figures (Runs)
+        updateBowlerRuns(r);
+
+        // Over Runs Sequence
+        appendOverRun(r === 0 ? "." : r);
+
+        // Auto Increment Ball
+        addBall(true);
+        
+        // Swap Strike for odd runs
+        if (r % 2 !== 0 && r > 0) {
+            swapStrike();
+        }
+
+        saveState();
+
+    }
+
+    function addWicket() {
+        if (!confirm("Confirm Wicket?")) return;
+        const scoreInput = document.getElementById('score');
+        const figuresEl = document.getElementById('bowlerFigures');
+
+        let current = scoreInput.value;
+        if (!current || !current.includes('/')) {
+            current = "0/0";
+        }
+        let [runs, wickets] = current.split('/').map(n => parseInt(n) || 0);
+        wickets += 1;
+        scoreInput.value = `${runs}/${wickets}`;
+
+        // Batter Balls
+        const bat1BallsInput = document.getElementById('bat1Balls');
+        let bBalls = parseInt(bat1BallsInput.value) || 0;
+        bat1BallsInput.value = bBalls + 1;
+
+        // Bowler Figures (Wicket)
+        let [w, r] = (figuresEl.value || "0/0").split('/').map(n => parseInt(n) || 0);
+
+        figuresEl.value = `${w + 1}/${r}`;
+
+        // Event
+        const ev = document.getElementById('event');
+        const oldVal = ev.value;
+        ev.value = "WICKET! ☝️";
+        saveState();
+
+        setTimeout(() => { 
+            if(ev.value.includes('WICKET!')) {
+                ev.value = oldVal; 
+                saveState(); 
+            }
+        }, 3000);
+
+        appendOverRun("W");
+
+        // Auto Increment Ball
+        addBall(true);
+
+        saveState();
+    }
+
+    function addBall(isLegal = true) {
+        if (!isLegal) return;
+        const oversInput = document.getElementById('overs');
+        const overRunsInput = document.getElementById('overRuns');
+        let current = parseFloat(oversInput.value) || 0;
+        let overs = Math.floor(current);
+        let balls = Math.round((current - overs) * 10) + 1;
+        
+        if (balls >= 6) {
+            overs += 1;
+            balls = 0;
+            // AUTO CLEAR OVER RUNS sequence for the next over
+            overRunsInput.value = "";
+            // Swap strike at the end of the over
+            swapStrike();
+        }
+        
+        oversInput.value = `${overs}.${balls}`;
+        saveState();
+    }
+
+    function addExtra(type, r) {
+        const scoreInput = document.getElementById('score');
+        let current = scoreInput.value;
+        if (!current || !current.includes('/')) {
+            current = "0/0";
+        }
+        let [runs, wickets] = current.split('/').map(n => parseInt(n) || 0);
+        
+        // Extra itself is 1 run + whatever they ran
+        runs += (1 + r);
+        scoreInput.value = `${runs}/${wickets}`;
+
+        // Bowler Figures (Extras count against bowler)
+        updateBowlerRuns(1 + r);
+
+        // Event
+        const ev = document.getElementById('event');
+        const oldVal = ev.value;
+        ev.value = type === 'NB' ? `NO BALL! ⚠️` : `WIDE BALL! ↔️`;
+        saveState();
+        
+        setTimeout(() => {
+            if(ev.value.includes('!')) {
+                ev.value = oldVal;
+                saveState();
+            }
+        }, 3000);
+
+        // Over Runs Sequence (e.g. 1nb, wd)
+        let eVal = (r > 0 ? (1+r) : "") + type.toLowerCase();
+        appendOverRun(eVal);
+    }
+
+    function resetMatch() {
+        if (!confirm("Are you sure you want to reset the match?")) return;
+        const defaultState = {
+            team1: "Team 1",
+            team2: "Team 2",
+            score: "0/0",
+            overs: "0.0",
+            bat1: "Batsman 1",
+            bat1Score: "0",
+            bat1Balls: "0",
+            bat2: "Batsman 2",
+            bat2Score: "0",
+            bat2Balls: "0",
+            bowler: "Bowler",
+            bowlerFigures: "0/0",
+            overRuns: "0 0 0 0",
+            event: ""
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
+        loadState();
+    }
+
+    // Initialize
+    window.onload = loadState;
+</script>
+
+</body>
+</html>
