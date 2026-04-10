@@ -79,19 +79,29 @@ function updateUI(d){
   }
 }
 
-function pollState(){
+const LOCAL_DEV = true;
+const API_URL = LOCAL_DEV ? "http://localhost:3000" : "";
+
+async function pollState(){
   try {
-    const data = localStorage.getItem("shc_match_state");
-    if (data) {
-      updateUI(JSON.parse(data));
+    const res = await fetch(`${API_URL}/state`);
+    if (res.ok) {
+      const data = await res.json();
+      updateUI(data);
     }
   } catch (err) {
-    console.error("Failed to read shc_match_state from localStorage.", err);
+    console.error("Failed to fetch state from server.", err);
+    
+    // Fallback to localStorage exactly as before if no server is running
+    try {
+      const bData = localStorage.getItem("shc_match_state");
+      if (bData) updateUI(JSON.parse(bData));
+    } catch(e) {}
   }
 }
 
-// Poll local storage every 100ms for instantaneous zero-latency updates
-setInterval(pollState, 100);
+// Poll server every 250ms
+setInterval(pollState, 250);
 
 // Run immediately once
 pollState();

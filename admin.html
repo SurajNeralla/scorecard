@@ -252,7 +252,17 @@
         </div>
 
         <div class="section">
-            <div class="section-title">Event/Ticker</div>
+            <div class="section-title">Event, Ticker & Target</div>
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>Target (Runs)</label>
+                    <input type="number" id="target" placeholder="e.g. 150" oninput="updateTargetString(); saveState()">
+                </div>
+                <div style="flex: 1;">
+                    <label>Match Overs</label>
+                    <input type="number" id="totalOvers" placeholder="e.g. 10" oninput="updateTargetString(); saveState()">
+                </div>
+            </div>
             <div class="form-group">
                 <label>Latest Event</label>
                 <input type="text" id="event" placeholder="e.g. BOUNDARY!" oninput="saveState()">
@@ -323,7 +333,9 @@
             bowler: document.getElementById('bowler'),
             bowlerFigures: document.getElementById('bowlerFigures'),
             overRuns: document.getElementById('overRuns'),
-            event: document.getElementById('event')
+            event: document.getElementById('event'),
+            target: document.getElementById('target'),
+            totalOvers: document.getElementById('totalOvers')
         };
     }
 
@@ -355,9 +367,60 @@
             bowler: inputs.bowler.value,
             bowlerFigures: inputs.bowlerFigures.value,
             overRuns: inputs.overRuns.value,
-            event: inputs.event.value
+            event: inputs.event.value,
+            target: inputs.target && inputs.target.value,
+            totalOvers: inputs.totalOvers && inputs.totalOvers.value
         };
+        
+        // 1. Save to Local Storage (Fallback)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        
+        // 2. Broadcast to Python Server (For OBS)
+        fetch("http://localhost:3000/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).catch(e => console.log("Server sync failed, falling back to local storage."));
+    }
+
+    function updateTargetString() {
+        const targetInput = document.getElementById('target');
+        const totalOversInput = document.getElementById('totalOvers');
+        if (!targetInput || !totalOversInput) return;
+        
+        const targetVal = parseInt(targetInput.value);
+        const oversVal = parseFloat(totalOversInput.value);
+        if (!targetVal || !oversVal) return;
+        
+        const scoreInput = document.getElementById('score');
+        const currentOversInput = document.getElementById('overs');
+        const ev = document.getElementById('event');
+        
+        let currentScoreStr = scoreInput.value || "0/0";
+        if (currentScoreStr.includes('/')) {
+            let runs = parseInt(currentScoreStr.split('/')[0]) || 0;
+            let currentOvers = parseFloat(currentOversInput.value) || 0;
+            
+            let runsNeeded = targetVal - runs;
+            
+            let c_o = Math.floor(currentOvers);
+            let c_b = Math.round((currentOvers - c_o) * 10);
+            let totalBallsBowled = (c_o * 6) + c_b;
+            let ballsRemaining = (oversVal * 6) - totalBallsBowled;
+            
+            let newEv = "";
+            if (runsNeeded <= 0) {
+                newEv = "TARGET CHASED!";
+            } else if (ballsRemaining <= 0) {
+                newEv = "MATCH OVER";
+            } else {
+                newEv = `NEED ${runsNeeded} OFF ${ballsRemaining}`;
+            }
+            
+            if (ev.value === "" || ev.value.includes("NEED ") || ev.value === "TARGET CHASED!" || ev.value === "MATCH OVER" || !ev.value.includes('!')) {
+                ev.value = newEv;
+            }
+        }
     }
 
     function appendOverRun(val) {
@@ -422,6 +485,7 @@
             setTimeout(() => { 
                 if(ev.value.includes('!')) {
                     ev.value = oldVal; 
+                    updateTargetString();
                     saveState(); 
                 }
             }, 3000);
@@ -450,6 +514,7 @@
             swapStrike();
         }
 
+        updateTargetString();
         saveState();
 
     }
@@ -486,6 +551,7 @@
         setTimeout(() => { 
             if(ev.value.includes('WICKET!')) {
                 ev.value = oldVal; 
+                updateTargetString();
                 saveState(); 
             }
         }, 3000);
@@ -495,6 +561,7 @@
         // Auto Increment Ball
         addBall(true);
 
+        updateTargetString();
         saveState();
     }
 
@@ -516,6 +583,7 @@
         }
         
         oversInput.value = `${overs}.${balls}`;
+        updateTargetString();
         saveState();
     }
 
@@ -543,6 +611,7 @@
         setTimeout(() => {
             if(ev.value.includes('!')) {
                 ev.value = oldVal;
+                updateTargetString();
                 saveState();
             }
         }, 3000);
@@ -550,6 +619,9 @@
         // Over Runs Sequence (e.g. 1nb, wd)
         let eVal = (r > 0 ? (1+r) : "") + type.toLowerCase();
         appendOverRun(eVal);
+        
+        updateTargetString();
+        saveState(); // Ensure it is cleanly updated if event is replaced entirely
     }
 
     function resetMatch() {
